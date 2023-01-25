@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOgin</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<style>
+body{
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	font-family: 'Jost', sans-serif;
+	background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    font-size: 17px;
+}
+.main{
+	width: 350px;
+	height: 490px;
+	background: #1d1d1d;
+	overflow: hidden;
+	border-radius: 10px;
+	box-shadow: 5px 20px 50px #000;
+}
+#chk{
+	display: none;
+}
+.signup{
+	position: relative;
+	width:100%;
+	height: 108%;
+}
+label{
+	color: #fff;
+	font-size: 2.3em;
+	justify-content: center;
+	display: flex;
+	margin: 40px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: .5s ease-in-out;
+}
+input{
+	width: 60%;
+	height: 20px;
+    background: #313131;
+	justify-content: center;
+	display: flex;
+	margin: 20px auto;
+	padding: 10px;
+	border: 2px solid transparent;
+	outline: none;
+	border-radius: 5px;
+    font-family: 'Jost', sans-serif;
+    color: white;
+}
+button{
+	width: 60%;
+	height: 40px;
+	margin: 10px auto;
+	justify-content: center;
+	display: block;
+	color: #fff;
+    background: #30408e;
+	font-size: 1em;
+	font-weight: bold;
+	margin-top: 20px;
+	outline: none;
+	border: none;
+	border-radius: 5px;
+	transition: .2s ease-in;
+	cursor: pointer;
+}
+button:hover{
+	background: #6d44b8;
+}
+#login{
+	height: 500px;
+	background: #eee;
+	border-radius: 60% / 10%;
+	transform: translateY(-180px);
+	transition: .8s ease-in-out;
+}
+#login label{
+	color: #573b8a;
+	transform: scale(.6);
+}
+#code__div{
+    width: 230px;
+    display: flex;
+    left: 50%;
+    transform: translateX(-50%);
+    position: relative;
+    justify-content: space-between;
+}
+
+#code_reg{
+    width: 40%;
+    margin: 0;
+}
+
+#code_btn{
+    width: 40%;
+    margin-top: 0;
+    margin: 0;
+    font-size: 0.9em;
+}
+input {
+    -webkit-box-shadow: inset 0 0 0 60px #2d2d2d;
+    -webkit-text-fill-color: rgb(255, 255, 255);
+    border: 1px solid #4c4c4c;
+}
+
+</style>
+<body>
+    <div class="main">  	
+		<input type="checkbox" id="chk" aria-hidden="true">
+
+			<div class="signup">
+				<form>
+					<label for="chk" aria-hidden="true" style="color: #cbb53a;margin: 40px 40px 20px 40px; font-size: 30px;" id="signup_label">Зарегистрироваться</label>
+					<input type="text" name="txt" placeholder="User name"  id="name_reg" required>
+					<input type="email" name="email" placeholder="Email"  id="email_reg">
+					<input type="password" name="password" placeholder="Password"  id="password_reg" required>
+                    <div id="code__div" style="display: none;">
+                        <input type="password" name="code" placeholder="code"  id="code_reg" style="border: 2px solid #e8e5e5;" required> 
+                        <button id="code_btn" style="background: #9d1617;">Submit</button>
+                    </div>
+					<button id="btn_reg">Создать</button>
+				</form>
+			</div>
+
+			<div id="login">
+				<form>
+					<label id="login_btn" aria-hidden="true">Вход</label>
+					<input type="email" name="email" placeholder="Email"  id="email_login" required>
+					<input type="password" name="password" placeholder="Password"  id="password_login" required>
+					<button id="btn_login">Войти</button>
+				</form>
+			</div>
+	</div>
+</body>
+<script>
+    document.getElementById('btn_reg').disabled = true;
+    document.getElementById('btn_reg').style.opacity = '0.6';
+    document.getElementById('login').style.transform = 'translateY(-515px)'; 
+        document.getElementById('login_btn').style.transform = 'scale(1)'; 
+        document.getElementById('signup_label').style.transform = 'scale(0.6)';
+
+    document.getElementById('login_btn').onclick = (event) =>{
+        event.preventDefault();
+
+        document.getElementById('login').style.transform = 'translateY(-515px)'; 
+        document.getElementById('login_btn').style.transform = 'scale(1)'; 
+        document.getElementById('signup_label').style.transform = 'scale(0.6)';   
+    }
+
+    document.getElementById('signup_label').onclick = (event) =>{
+        event.preventDefault();
+        document.getElementById('login').style.transform = 'translateY(-180px)';
+        document.getElementById('login_btn').style.transform ='scale(0.6)';
+        document.getElementById('signup_label').style.transform= 'scale(1)';
+    }
+////////////
+const labelName = document.getElementById('name_reg');
+let flagLabelName = false;
+let flagCode = false;
+labelName.oninput = (event)=>{
+    
+    socket.emit('validate name', labelName.value, (response)=>{
+        
+        if(response){
+            labelName.style.border = '2px solid #85e37d';
+            flagLabelName = true;
+            
+        }else{
+            labelName.style.border = '2px solid #B43A3F';
+            flagLabelName = false;
+            if(labelName.value == '') labelName.style.border = '2px solid transparent';
+        }
+    })
+}
+
+document.getElementById('password_reg').oninput = () =>{
+    if(flagLabelName && document.getElementById('email_reg').value){
+        document.getElementById('btn_reg').disabled = false;
+        document.getElementById('btn_reg').style.opacity = '1';
+    }else{
+        document.getElementById('btn_reg').disabled = true;
+        document.getElementById('btn_reg').style.opacity = '0.6'; 
+    }
+}
+////////////
+var socket = io();
+document.getElementById('btn_login').onclick = () =>{
+    event.preventDefault();
+
+    socket.emit('login', {
+        email: document.getElementById('email_login').value,
+        password: document.getElementById('password_login').value,
+    },
+    (object) =>{
+
+        switch(object.response){
+            case "Вход в систему успешен": 
+                window.location.href = object.stringConnection;
+                break;
+            case "Неверный пароль": 
+                alert(object.response); 
+                document.getElementById('password_login').value = '';
+                break;
+            
+            case "Пользователь не найден": alert(response); break;
+        }
+    })
+}
+
+document.getElementById('btn_reg').onclick = (event) =>{
+    event.preventDefault();
+    if(!flagCode){
+        socket.emit('registration', {
+        login: document.getElementById('name_reg').value,
+        email: document.getElementById('email_reg').value,
+        password: document.getElementById('password_reg').value,
+        dataReg: new Date().toISOString().slice(0, 10)
+    }, (response) => {
+
+        switch(response){
+            case 'Имя занято': alert(response); break;
+            case 'Пользователь с этой почтой уже зарегистрирован': alert(response); 
+            document.getElementById('email_reg').value = '';
+            break;
+
+            case 'Проверьте ваш email': 
+            document.getElementById('btn_reg').disabled = true;
+            document.getElementById('btn_reg').style.opacity = '0.6';
+            document.getElementById('code__div').style.display = 'flex'; break;
+        }
+    });
+
+    }else{
+        socket.emit('added in DB', document.getElementById('email_reg').value, (response) =>{
+            console.log(response);
+            switch(response){
+                case 'ошибка': alert('Ошибка со стороны сервера. Перезагрузите страничку и попробуйте снова'); break;
+
+                case 'успешно': 
+                document.getElementById('login').style.transform = 'translateY(-515px)'; 
+                document.getElementById('login_btn').style.transform = 'scale(1)'; 
+                document.getElementById('signup_label').style.transform = 'scale6)';
+                document.getElementById('email_login').value = document.getElementById('email_reg').value;
+                break;
+            }
+        })
+    }
+   
+
+}
+
+document.getElementById('code_btn').onclick = (event) =>{
+    event.preventDefault();
+    let code = document.getElementById('code_reg').value;
+
+    socket.emit('validate code', {
+        code: code,
+        email: document.getElementById('email_reg').value
+    }, (response)=>{
+        switch(response){
+            case 'Неверный код':            
+            document.getElementById('code_reg').value = '';
+            document.getElementById('code_reg').style.border = '2px solid #B43A3F';
+            flagCode = false;
+                break;
+            
+            case 'успешно':
+            document.getElementById('code_reg').style.border = '2px solid #85e37d'; 
+            document.getElementById('code__div').style.display = 'none';
+            flagCode = true;
+            document.getElementById('btn_reg').disabled = false;
+            document.getElementById('btn_reg').style.opacity = '1';
+                break;
+        }
+        
+    })
+}
+
+
+</script>
+</html>
+
+

@@ -1,0 +1,20 @@
+const Player = {
+    name: "user",
+    Score:0,
+    LvL: 1,
+    countScoreLvL: 1000,
+    healtRegen: 0.25,
+    maxHealth: 1000,
+    bodyDamage: 0,
+    bullet:{
+        speed: 8,
+        penetration: 100,
+        damage: 30,
+        reload: 50,
+        size: 12,
+        timeLife: 200,
+        recoil: 5,
+        speedShooting: 0,
+    },
+    movementSpeed: 4,
+}

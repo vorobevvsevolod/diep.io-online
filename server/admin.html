@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/progressbar.js@1.0.1/dist/progressbar.min.js"></script>
+</head>
+
+<style>
+    *,
+    *::after,
+    *::before{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;    
+    }
+    html{
+        display: block;
+        font-family: 'Jost', sans-serif;
+    }
+    body{
+        font-size: 17px;
+        background-color: #272727;
+    }
+    #mainTxt{
+        text-align: center;
+        color: white;
+        font-size: 3em;
+        margin: 10px 0 10px 0;
+    }
+    .menu{
+        display: block;
+        border: 2px solid rgb(120, 120, 120);
+        width: 100%;
+        border-radius: 20px;
+        padding: 30px;
+        background-color: #141414;
+    }
+    button{
+        font-family: 'Jost', sans-serif;
+        font-size: 20px;
+        padding: 5px 30px;
+        border-radius: 20px;
+        border: 3px solid #FFC93C;
+        background-color: #171717;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease-in;
+    }
+
+    button:hover{
+        border: 3px solid #08D9D6;
+        letter-spacing: 2px;
+    }
+
+    #DB__collection, #players__collection{
+        background-color: #353535;
+        font-size: 20px;
+        color: white;
+        
+        padding: 30px;
+        padding-top: 20px;
+        margin: 0 20px 0 20px;
+        border: 3px solid #F9ED69;
+        border-top: 1px solid transparent;
+        border-radius: 0px 0px 20px 20px;
+    }
+    
+
+    .DB_element, .players__element{
+        width: 100%;
+        border: 2px solid #FC5185;
+        height: 100px;      
+        border-radius: 20px;
+        margin-top: 30px;
+    }
+
+    .DB_element div{
+        margin-right: 20px;
+    }
+    .players__element div{
+        margin-right: 20px;
+    }
+
+    .DB_container, .players__container{
+        padding: 30px;
+        padding-right: 100px;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .spanDB__Collection, .spanPlayer__Collection{
+        margin-right: 10px; 
+        color: rgb(116, 116, 116);
+    }
+    .btn_deleteDB{
+        position: absolute;
+        right: 1%;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 2px 14px;
+        height: 28px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-color: #921418;
+        line-height: 15px;
+    }
+
+    .btn_deleteDB:hover{
+        border: 2px solid #9a9a9a;
+        letter-spacing: 0px;
+    }
+
+    #btn_addedDB{
+        position: absolute;
+        left: 3%;
+        top: 12.5%;
+        padding: 2px 14px;
+        height: 28px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-color: #4a9b44;
+        line-height: 15px;
+    }
+
+    #btn_addedDB:hover{
+        border: 2px solid #9a9a9a;
+        letter-spacing: 0px;
+    }
+
+    #DB__added{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 400px;
+        height: 300px;
+        background-color: rgb(255, 255, 255);
+        border-radius: 15px;
+        padding: 10px;
+    }
+    .DB__added_titleMain{
+        margin-top: 6px;
+        font-size: 25px;
+        text-align: center;
+        font-weight: bold;
+        border-bottom: 3px solid black;
+        color: black;
+    }
+
+    .input_DB{
+        line-height: 42px;
+        color: black;
+    }
+
+    .container__added{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+    #btn__addedDB__two{
+        position: absolute;
+        left: 50%;
+        bottom: 5%;
+        transform: translateX(-50%);
+    }
+    input{
+        width: 270px;
+        border-radius: 10px;
+        padding: 5px;
+        font-family: 'Jost', sans-serif;
+        background-color: #303030;
+        color: white;
+        font-size: 20px;
+    }
+
+    #close_added{
+        position: absolute;
+        top: 3%;
+        right: 3%;
+        width: 15px;
+        height: 15px;
+        background-color: #d41e24;
+        border-radius: 30px;
+        cursor: pointer;
+    }
+    .divPlayer__Collection{
+        width: 200px;
+    }
+
+
+    .progress__cpu, .progress__memory {
+        width: 450px; 
+        height: 450px; 
+        position: relative;
+    }
+    .progress__memory_txt{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        text-align: center;
+    }
+    .progress__memory_txt-title{
+        color: white;
+        font-weight: bold;
+        letter-spacing: 4px;
+        font-size: 30px;
+    }
+    .progress__memory_txt-subtitle{
+        font-size: 20px;
+        color: #dfd23f;
+    }
+    #information__server{
+        display: none; 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        padding: 50px;
+        border-radius: 10px;
+        background-color: #181818;
+    }
+
+</style>
+<body>
+    <div class="menu">
+        <div class="btn__collection">
+            <button id="btn_BD" style="margin-right: 30px;">База Данных</button>
+            <button id="btn_player" style="margin-right: 30px;">Игроки</button>
+            <button id="btn_figure" style="margin-right: 30px;">Фигуры</button>
+            <button id="btn_information" style="margin-right: 30px;">Загруженность сервера</button>
+        </div>
+    </div>
+
+    <div id="DB__collection" style="display: none;">
+        <button id="btn_addedDB">Добавить</button>
+        <div id="DB__colections">
+
+        </div> 
+        <div id="DB__added" style="display: none;">
+            <a id="close_added"></a>
+            <div class="DB__added_titleMain">Добавление записи</div> 
+              <div class="added__collection">
+                <div class="container__added"><div class="input_DB">Имя: </div> <input type="text" id="name__added"></div>
+                <div class="container__added"><div class="input_DB">Почта: </div> <input type="text" id="email__added"></div>
+                <div class="container__added"><div class="input_DB">Пароль: </div> <input type="text" id="password__added"></div>
+              </div>
+            <button id="btn__addedDB__two">Добавить</button> 
+        </div>      
+    </div>
+
+    <div id="players__collection" style="display: none;">
+        
+    </div>
+    
+    <div id="information__server">
+        <div class="progress__cpu" id="cpu-status">
+            <div class="progress-bar-fill"></div>
+            <div class="progress__memory_txt">
+                <div class="progress__memory_txt-title">CPU</div>
+                <div id="cpu_txt" class="progress__memory_txt-subtitle">0</div>
+            </div>
+        </div>
+        <div class="progress__memory" id="memory-status">
+            <div class="progress-bar-fill"></div>
+            <div class="progress__memory_txt">
+                <div class="progress__memory_txt-title">RAM</div>
+                <div id="memory_txt" class="progress__memory_txt-subtitle">0</div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    var socket = io();
+    var cpuOptions = {
+    strokeWidth: 15,
+    trailColor: '#424242',
+    trailWidth: 3,
+    easing: 'easeInOut',
+    duration: 1400,
+    text: {
+        autoStyleContainer: false
+    },
+    from: { color: '#85e37d', width: 3 },
+    to: { color: '#85e37d', width: 20 },
+    step: function(state, bar) {
+        bar.setText(Math.round(bar.value() * 100) + ' %');
+        bar.path.setAttribute('stroke', state.color);
+        bar.path.setAttribute('stroke-width', state.width);
+    }
+};
+    var memoryOptions = {
+    strokeWidth: 15,
+    trailColor: '#424242',
+    trailWidth: 3,
+    easing: 'easeInOut',
+    duration: 1400,
+    from: { color: '#B43A3F', width: 3 },
+    to: { color: '#B43A3F', width: 20 },
+    step: function(state, bar) {
+        bar.setText(Math.round(bar.value() * 100) + ' %');
+        bar.path.setAttribute('stroke', state.color);
+        bar.path.setAttribute('stroke-width', state.width);
+    }
+};
+    var cpuStatus = new ProgressBar.Circle("#cpu-status", cpuOptions);
+    var memoryStatus = new ProgressBar.Circle("#memory-status", memoryOptions);
+    cpuStatus.text.style.display = 'none';
+    memoryStatus.text.style.display = 'none';
+    
+    let flagBtnDB = false, flagBtnPlayers = false, flagBtnFigure = false, flagBtnServerInfo = false;
+//////////////////////База данных////////////////////////////////////////////
+    document.getElementById('btn_BD').onclick = (event) =>{
+        event.preventDefault();
+        (flagBtnDB) ? flagBtnDB = false : flagBtnDB = true;
+        if(flagBtnDB){ 
+                    
+            document.getElementById('DB__collection').style.display = 'block';
+            
+            getDBFromServer();
+
+            socket.on('update DB', (response) =>{
+                document.getElementById('DB__collection').innerHTML = '';
+                for(let i in response)
+                    createDBelemetns(response[i]);
+            })
+        } else {document.getElementById('DB__collection').style.display = 'none'; document.getElementById('DB__colections').innerHTML = ''}
+    }
+
+    document.getElementById('btn_addedDB').onclick = (event) =>{
+        event.preventDefault();
+        document.getElementById('DB__added').style.display = 'block';        
+    }
+
+    document.getElementById('btn__addedDB__two').onclick = (event) =>{
+        event.preventDefault();
+        socket.emit('added in DB SERVER', {
+            username: document.getElementById('name__added').value,
+            email: document.getElementById('email__added').value,
+            password: document.getElementById('password__added').value,
+            time: new Date().toISOString().slice(0, 10),
+        }, (response) =>{
+            switch(response){
+                case 'Имя занято': alert(response); break;
+                case 'email уже существует': alert(response); break;
+                case 'ошибка': alert(response); break;
+                case 'успешно': 
+                getDBFromServer();
+                document.getElementById('DB__added').style.display = 'none';
+                document.getElementById('name__added').value = '';
+                document.getElementById('email__added').value = '';
+                document.getElementById('password__added').value = '';
+                break;
+            }
+        })
+    }
+
+    document.getElementById('close_added').onclick = (event) =>{
+
+        event.preventDefault();
+        document.getElementById('DB__added').style.display = 'none';
+    }
+    
+    function deleteUsersInDB(id){
+        socket.emit('delete users in DB', id, (response) =>{
+            switch(response){
+                case 'успешно': getDBFromServer(); break; 
+                case 'ошибка': alert(response); break; 
+            }
+        })
+    }
+    function getDBFromServer(){
+        document.getElementById('DB__colections').innerHTML = ''
+        socket.emit('get DB', "arg", (response) =>{
+                for(let i in response)
+                    createDBelemetns(response[i]);
+            })
+    }
+    function createDBelemetns(object){
+            document.getElementById('DB__colections').innerHTML += `
+            <div class="DB_element">
+                <div class="DB_container">
+                    <div class="DB_container_top">
+                    <div class="DB_id"><span class="spanDB__Collection">id:</span>${object.id}</div>
+                    <div class="DB_username"><span class="spanDB__Collection">Username:</span >${object.username}</div>
+                    <div class="DB_email"><span class="spanDB__Collection">E-mail:</span>${object.email}</div>
+                    </div>
+                    <div class="DB_container_down">
+                    <div class="DB_password"><span class="spanDB__Collection">Password:</span><i>${object.password.substring(0, 15)}...</i> </div>
+                    <div class="DB_time"><span class="spanDB__Collection">Create time:</span>${object.create_time}</div>
+                    <button class="btn_deleteDB" onclick="deleteUsersInDB(${object.id})">удалить</button>
+                    </div>
+                </div>           
+            </div>
+            `
+        }
+    
+       
+////////////////////////////Игроки///////////////////////////////////////////
+    document.getElementById('btn_player').onclick = (event) =>{
+        event.preventDefault();
+        (flagBtnPlayers) ? flagBtnPlayers = false : flagBtnPlayers = true;
+        if(flagBtnPlayers){ 
+            document.getElementById('players__collection').style.display ='block';
+            socket.emit('get players', true);
+        }else{
+            document.getElementById('players__collection').style.display ='none';
+            socket.emit('get players', false);
+        }
+        
+
+    }
+    document.getElementById('btn_figure').onclick = (event) =>{
+        event.preventDefault();
+
+    }
+    
+    socket.on('reload information players in Server', (players)=>{
+        getPlayersFromServer(players)
+    })
+    function getPlayersFromServer(players){
+        document.getElementById('players__collection').innerHTML = '';
+        for(let i in players)
+            createPlayersElements(players[i]);
+    }
+    function createPlayersElements(players){
+
+        document.getElementById('players__collection').innerHTML += `
+        <div class="players__element">
+            <div class="players__container">
+                <div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">Name:</span>${players.id}</div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">CordX:</span>${Math.floor(players.cordX)}</div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">CordY:</span>${Math.floor(players.cordY)}</div>
+                </div>
+                <div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">Health:</span>100</div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">LvL:</span>10</div>
+                    <div class="divPlayer__Collection"><span class="spanPlayer__Collection">Score:</span>3428 <i>pts</i></div>
+                </div>
+                <div>
+                    <div><span class="spanPlayer__Collection">SocketId:</span>${players.socketId}</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+//////////////////////////Информация о сервере///////////////////////////
+let setIntervalID;
+document.getElementById('btn_information').onclick = (event)=>{
+    event.preventDefault();
+    (flagBtnServerInfo) ? flagBtnServerInfo = false : flagBtnServerInfo = true;
+
+    if(flagBtnServerInfo){
+        document.getElementById('information__server').style.display = 'flex';
+        setIntervalID = setInterval(() => {
+            socket.emit('get information cpu and memory', "asd", (cpu, memory) =>{
+                memoryStatus.animate((memory / 200));
+                cpuStatus.animate(cpu / 100);
+                document.getElementById('memory_txt').innerText = `${memory} МБ`
+                document.getElementById('cpu_txt').innerText = `${cpu} %`
+            }) 
+        }, 1000);
+        
+    }else{
+        document.getElementById('information__server').style.display = 'none';
+        clearInterval(setIntervalID);
+    }
+}
+</script>
+</html>
